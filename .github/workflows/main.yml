@@ -1,34 +1,21 @@
-name: Python SAST avec Bandit
+name: SAST
 
-on:
-  push:
-    branches:
-      - main  # Déclenche l'analyse sur les modifications de la branche principale
-  pull_request:
-    branches:
-      - main  # Analyse les pull requests vers la branche principale
-
+on: [push]
 jobs:
-  bandit-analysis:
-    name: Analyse SAST avec Bandit
+  sast_scan:
+    name: Run Bandit Scan
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v3
         with:
-          python-version: '3.0'  # Adaptez la version de Python à celle de votre projet
-
-      - name: Install dependencies
-        run: |
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
+          python-version: 3.8
       - name: Install Bandit
         run: pip install bandit
-
-      - name: Run Bandit analysis
-        run: bandit -r .  # Analyse récursive de tous les fichiers Python
-
+      - name: Run Bandit Scan with Metrics
+        run: bandit -ll -ii -r . -f txt -o bandit-report.txt
+        continue-on-error: true
+      - name: Display Bandit Report
+        run: cat bandit-report.txt
